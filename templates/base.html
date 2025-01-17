@@ -1,48 +1,101 @@
-{% extends "bootstrap/base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avaliação Semestral</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
 
-{% block title %}Flasky{% endblock %}
+    <!-- Estilo personalizado -->
+    <style>
+        /* Garantir que a navbar ocupe toda a largura horizontalmente */
+        .navbar {
+            width: 100%; /* Garante que a navbar ocupe 100% da largura */
+            background-color: #000; /* Fundo preto apenas na navbar */
+        }
 
-{% block head %}
-{{ super() }}
-<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
-<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
-{% endblock %}
+        /* Aumentando o tamanho da fonte das abas */
+        .navbar-nav .nav-link {
+            font-size: 18px; /* Aumenta o tamanho da fonte */
+        }
 
-{% block navbar %}
-<div class="navbar navbar-inverse" role="navigation">
-    <div class="container">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="/">Flasky</a>
+        /* Alinhar todos os textos à esquerda */
+        body, .container-fluid, .content, #local-time {
+            text-align: left; /* Alinha todos os textos à esquerda */
+        }
+
+        /* Garantir que o título da página "Avaliação Semestral" esteja alinhado à esquerda */
+        .navbar-brand {
+            text-align: left !important; /* Garante que o título "Avaliação Semestral" esteja à esquerda */
+        }
+
+        /* Evitar que a navbar se alinha ao centro ou direita */
+        .navbar-nav .nav-item {
+            text-align: left;
+        }
+
+        /* Ajustar a estrutura para garantir o bom comportamento em dispositivos móveis */
+        .navbar-collapse {
+            justify-content: flex-start; /* Garante que a navbar se alinhe à esquerda em dispositivos móveis */
+        }
+
+        /* Garantir que a navbar tenha um bom espaçamento no mobile */
+        @media (max-width: 767px) {
+            .navbar-nav {
+                margin-left: 0;
+                padding-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/">Avaliação Semestral</a>
+                <div class="collapse navbar-collapse">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item"><a class="nav-link" href="/professores">Cadastro de Professores</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/disciplinas">Cadastro de Disciplinas</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/alunos">Cadastro de Alunos</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/cursos">Cadastro de Cursos</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/ocorrencias">Cadastro de Ocorrências</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <div class="content mt-4">
+            {% block content %}{% endblock %}
         </div>
-        <div class="navbar-collapse collapse">
-            <ul class="nav navbar-nav">
-                <li><a href="/">Home</a></li>
-            </ul>
+
+        <!-- Exibir data e hora local (exceto na página de "Cadastro de Alunos") -->
+        <div id="local-time" style="margin-top: 20px;">
+            <!-- A data e hora local será exibida aqui -->
         </div>
     </div>
-</div>
-{% endblock %}
 
-{% block content %}
-<div class="container">
-    {% for message in get_flashed_messages() %}
-    <div class="alert alert-warning">
-        <button type="button" class="close" data-dismiss="alert">&times;</button>
-        {{ message }}
-    </div>
-    {% endfor %}
+    <script>
+        // Função para exibir data e hora local no formato desejado
+        function displayLocalTime() {
+            // Verifica se estamos na página de Cadastro de Alunos
+            const path = window.location.pathname;
+            if (path !== '/alunos') {
+                const options = {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: 'numeric',
+                    hour12: true
+                };
+                const date = new Date();
+                const localTime = date.toLocaleString('en-US', options);
+                document.getElementById('local-time').innerHTML = "A data e hora local é " + localTime + ".";
+            }
+        }
 
-    {% block page_content %}{% endblock %}
-</div>
-{% endblock %}
-
-{% block scripts %}
-{{ super() }}
-{{ moment.include_moment() }}
-{% endblock %}
+        // Chama a função para exibir a data e hora ao carregar a página
+        displayLocalTime();
+    </script>
+</body>
+</html>

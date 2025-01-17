@@ -1,96 +1,84 @@
 import os
-from flask import Flask, render_template, session, redirect, url_for
+from flask import Flask, render_template, redirect, url_for, request
 from flask_bootstrap import Bootstrap
-from flask_moment import Moment
-from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, SelectField
-from wtforms.validators import DataRequired
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from wtforms import StringField, SelectField, SubmitField
+from wtforms.validators import DataRequired
+from flask_wtf import FlaskForm
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'hard to guess string'
-app.config['SQLALCHEMY_DATABASE_URI'] =\
-    'sqlite:///' + os.path.join(basedir, 'data.sqlite')
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'data.sqlite')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 bootstrap = Bootstrap(app)
-moment = Moment(app)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
-
-class Role(db.Model):
-    __tablename__ = 'roles'
+# Modelo para alunos
+class Aluno(db.Model):
+    __tablename__ = 'alunos'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), unique=True)
-    users = db.relationship('User', backref='role', lazy='dynamic')
+    nome = db.Column(db.String(64), nullable=False)
+    disciplina = db.Column(db.String(64), nullable=False)
 
-    def __repr__(self):
-        return '<Role %r>' % self.name
+# Formulário de cadastro de alunos
+class AlunoForm(FlaskForm):
+    nome = StringField('Cadastre o novo Aluno', validators=[DataRequired()])
+    disciplina = SelectField('Disciplina Associada',
+                             choices=[('DSWA5', 'DSWA5'),
+                                      ('GPSA5', 'GPSA5'),
+                                      ('IHCA5', 'IHCA5'),
+                                      ('SODA5', 'SODA5'),
+                                      ('PJIA5', 'PJIA5'),
+                                      ('TCOA5', 'TCOA5')],
+                             validators=[DataRequired()])
+    submit = SubmitField('Cadastrar')
 
-
-class User(db.Model):
-    __tablename__ = 'users'
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(64), unique=True, index=True)
-    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
-
-    def __repr__(self):
-        return '<User %r>' % self.username
-
-
-class NameForm(FlaskForm):
-    name = StringField('What is your name?', validators=[DataRequired()])
-    role = SelectField('Role?', choices=[('Administrator', 'Administrator'),
-                                         ('Moderator', 'Moderator'),
-                                         ('User', 'User')])
-    submit = SubmitField('Submit')
-
-@app.shell_context_processor
-def make_shell_context():
-    return dict(db=db, User=User, Role=Role)
-
-
-@app.errorhandler(404)
-def page_not_found(e):
-    return render_template('404.html'), 404
-
-
-@app.errorhandler(500)
-def internal_server_error(e):
-    return render_template('500.html'), 500
-
-
-@app.route('/', methods=['GET', 'POST'])
+# Rotas principais
+@app.route('/')
 def index():
-    form = NameForm()
+    aluno = "Leonardo Tolentino Correia"
+    prontuario = "PT3026621"
+    return render_template('index.html', aluno=aluno, prontuario=prontuario)
+
+@app.route('/alunos', methods=['GET', 'POST'])
+def alunos():
+    form = AlunoForm()
     if form.validate_on_submit():
-        role = Role.query.filter_by(name=form.role.data).first()
-        if not role:
-            role = Role(name=form.role.data)
-            db.session.add(role)
-            db.session.commit()
+        novo_aluno = Aluno(nome=form.nome.data, disciplina=form.disciplina.data)
+        db.session.add(novo_aluno)
+        db.session.commit()
+        return redirect(url_for('alunos'))
 
-        user = User.query.filter_by(username=form.name.data).first()
-        if not user:
-            user = User(username=form.name.data, role=role)
-            db.session.add(user)
-            db.session.commit()
-            session['known'] = False
-        else:
-            session['known'] = True
-        session['name'] = form.name.data
-        session['role'] = form.role.data
-        return redirect(url_for('index'))
+    alunos = Aluno.query.all()
+    return render_template('alunos.html', form=form, alunos=alunos)
 
-    users = User.query.all()
-    roles = Role.query.all()
-    return render_template('index.html',
-                           form=form,
-                           name=session.get('name'),
-                           known=session.get('known', False),
-                           users=users,
-                           roles=roles)
+@app.route('/cadastro', methods=['GET', 'POST'])
+def cadastro():
+    form = AlunoForm()
+    mensagem = None  # Inicializamos a variável de mensagem como None
+    if form.validate_on_submit():
+        # Criação de um novo aluno
+        novo_aluno = Aluno(nome=form.nome.data, disciplina=form.disciplina.data)
+        db.session.add(novo_aluno)  # Adiciona o aluno ao banco de dados
+        db.session.commit()  # Confirma a transação
+        mensagem = "Estudante cadastrado com sucesso!"  # Mensagem de sucesso que será exibida no pop-up
+        # Redireciona para a página de cadastro (recarregando a página com a nova mensagem)
+        return redirect(url_for('cadastro', mensagem=mensagem))
+
+    # Quando a página for renderizada, passamos a lista de alunos e a mensagem (se houver)
+    return render_template('alunos.html', form=form, alunos=Aluno.query.all(), mensagem=mensagem)
+
+@app.route('/professores')
+@app.route('/disciplinas')
+@app.route('/cursos')
+@app.route('/ocorrencias')
+def unavailable():
+    return render_template('unavailable.html')
+
+if __name__ == '__main__':
+    app.run(debug=True)

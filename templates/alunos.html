@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <div class="mb-3">
+            {{ form.nome.label }}
+            {{ form.nome(class="form-control") }}
+        </div>
+        <div class="mb-3">
+            {{ form.disciplina.label }}
+            {{ form.disciplina(class="form-select") }}
+        </div>
+        {{ form.submit(class="btn btn-primary") }}
+    </form>
+
+    <!-- Alerta de Mensagem -->
+    {% if mensagem %}
+    <div class="alert alert-primary" role="alert">
+        {{ mensagem }}
+    </div>
+    {% endif %}
+
+    <hr>
+    <h2>Relação de Alunos Cadastrados</h2>
+    <table class="table custom-table">
+        <thead>
+            <tr>
+                <th>Aluno</th>
+                <th>Disciplina</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for aluno in alunos %}
+            <tr>
+                <td>{{ aluno.nome }}</td>
+                <td>{{ aluno.disciplina }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Estilo da Tabela -->
+<style>
+    .custom-table {
+        font-size: 14px;
+        border-collapse: collapse;
+    }
+
+    .custom-table thead th {
+        border-bottom: 2px solid #ccc;
+        text-align: left;
+        padding-left: 15px;
+    }
+
+    .custom-table tbody td {
+        text-align: left;
+        padding-left: 15px;
+        border-bottom: 1px solid #d3d3d3; /* Apenas a borda inferior */
+    }
+
+    .custom-table tbody tr {
+        border-top: 1px solid #d3d3d3; /* Adiciona a linha de separação entre as linhas da tabela */
+    }
+</style>
+
+{% endblock %}

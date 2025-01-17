@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="text-center">
+    <h1 style="font-size: 24px; margin-bottom: 30px;">Não Disponível</h1>
+</div>
+
+<!-- Linha de separação -->
+<hr>
+
+<!-- CSS específico para esta página -->
+<style>
+    /* Alinhar texto à esquerda nesta página */
+    body, .container-fluid, .content, #local-time, h1 {
+        text-align: left; /* Alinha todos os textos à esquerda */
+    }
+
+    /* Tamanho menor do título */
+    h1 {
+        font-size: 30px;  /* Diminuir o tamanho da fonte do título */
+        margin-bottom: 25px; /* Aumenta a separação entre o título e o conteúdo */
+    }
+
+    /* Ajustar a separação entre o título e a barra de navegação */
+    .navbar {
+        margin-bottom: 50px; /* Ajusta a separação entre a navbar e o conteúdo */
+    }
+</style>
+{% endblock %}
